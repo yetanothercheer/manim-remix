@@ -1,0 +1,6 @@
+{
+  "javascript.suggest.names": false,
+  "editor.fontFamily": "'Jetbrains Mono', 'Cascadia Code Light', Consolas, 'Courier New', monospace",
+  // "editor.hover.enabled": false,
+  "editor.minimap.enabled": false
+}
