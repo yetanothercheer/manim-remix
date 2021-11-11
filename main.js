@@ -10,6 +10,10 @@ const range = (idx) => Array.from({ length: idx }).map((_, i) => i);
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+const gcd = (a, b) => (!b ? a : gcd(b, a % b));
+
+const lcm = (a, b) => a * (b / gcd(a, b));
+
 // const __nj_array = nj.array;
 // nj.array = (_, __) => __nj_array(_, "float32");
 
@@ -243,11 +247,17 @@ class Trans extends VMobject {
     this.fill = this.interpolate(this.a.fill, this.b.fill, t);
     this.stroke = this.interpolate(this.a.stroke, this.b.stroke, t);
 
-    if (this.a.get_num_points() > this.b.get_num_points()) {
-      this.b.resize(this.a.get_num_points());
-    } else {
-      this.a.resize(this.b.get_num_points());
-    }
+    // Approach 1
+    // if (this.a.get_num_points() > this.b.get_num_points()) {
+    //   this.b.resize(this.a.get_num_points());
+    // } else {
+    //   this.a.resize(this.b.get_num_points());
+    // }
+    // Approach 2
+    let lcm_length = lcm(this.a.get_num_points(), this.b.get_num_points());
+    this.a.resize(lcm_length);
+    this.b.resize(lcm_length);
+
     this.points = nj.zeros([this.a.get_num_points(), this.dim]);
     // let start = new Date().getTime();
     for (let i = 0; i < this.a.get_num_points(); i++) {
@@ -747,7 +757,7 @@ const Renderer = (() => {
     s.rotate(Math.PI / 4);
     let c = new Circle();
     c.fill = nj.array([0.7, 0.3, 0.4, 1]);
-    c.stroke = nj.array([0.5, 0.1, 0.9, 1]);
+    c.stroke = nj.array([1, 103 / 255, 23 / 255, 1]);
     await play(new PartialObject(s));
     await play(new Trans(s, c));
     await play(new FadeOut(c));
