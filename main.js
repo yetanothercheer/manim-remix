@@ -69,7 +69,12 @@ class VMobject {
     return p0.multiply(1 - t).add(p1.multiply(t));
   }
 
+  transform_matrix = nj.identity(3);
   // transform
+  lazyApply(transform_matrix) {
+    this.transform_matrix = transform_matrix;
+  }
+
   apply(f) {
     for (let i = 0; i < this.get_num_points(); i++) {
       let p = this.get_points_at(i);
@@ -731,7 +736,23 @@ const Renderer = (() => {
         Renderer.clear();
         updatable.forEach((u) => {
           if (u.points) {
+            let t = u.transform_matrix;
+            ctx.translate(window.innerWidth / 2, window.innerHeight / 2);
+            ctx.transform(1, 0, 0, -1, 0, 0);
+            ctx.transform(
+              t.get(0, 0),
+              t.get(1, 0),
+              t.get(0, 1),
+              t.get(1, 1),
+              t.get(0, 2),
+              t.get(1, 2)
+            );
+            ctx.transform(1, 0, 0, -1, 0, 0);
+            ctx.translate(-window.innerWidth / 2, -window.innerHeight / 2);
+            // From Bottom To Up:
+            // translate to origin, flip, real transform, flip, translate to center.
             Renderer.renderVMObject(u);
+            ctx.resetTransform();
           }
         });
       });
@@ -782,7 +803,16 @@ const Renderer = (() => {
           basis2 = nj.array([0, 100]);
           v1.setLine([0, 0], basis1);
           v2.setLine([0, 0], basis2);
-          vs.setBasis(basis1, basis2);
+          // vs.setBasis(basis1, basis2);
+          vs.lazyApply(
+            nj
+              .array([
+                [basis1.get(0) / 100, basis2.get(0) / 100, 0],
+                [basis1.get(1) / 100, basis2.get(1) / 100, 0],
+                [0, 0, 1],
+              ])
+              .reshape(3, 3)
+          );
         },
       },
     ]);
